@@ -1,0 +1,65 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Fri Aug  1 08:50:20 2025
+[*]
+[dumpfile] "/Users/downeyflyfan/Projects/Track/Verilog-Track/Simulation/waveform.vcd"
+[dumpfile_mtime] "Fri Aug  1 08:49:17 2025"
+[dumpfile_size] 1480656
+[savefile] "/Users/downeyflyfan/Projects/Track/Verilog-Track/Simulation/setting.gtkw"
+[timestart] 0
+[size] 1728 1051
+[pos] -1 -1
+*-14.000000 13350 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[markername] AA
+[markername] BB
+[markername] CC
+[markername] DD
+[markername] EE
+[markername] FF
+[markername] GG
+[markername] HH
+[markername] II
+[markername] JJ
+[markername] KK
+[markername] LL
+[markername] MM
+[markername] NN
+[markername] OO
+[markername] PP
+[markername] QQ
+[markername] RR
+[markername] SS
+[markername] TT
+[markername] UU
+[markername] VV
+[markername] WW
+[markername] XX
+[markername] YY
+[markername] ZZ
+[treeopen] tb_sobel_conv.
+[treeopen] tb_sobel_conv.dut.
+[sst_width] 255
+[signals_width] 170
+[sst_expanded] 1
+[sst_vpaned_height] 317
+@28
+tb_sobel_conv.dut.clk
+tb_sobel_conv.rst_n
+tb_sobel_conv.read_en
+tb_sobel_conv.conv_en
+tb_sobel_conv.conv_out_vld
+@22
+tb_sobel_conv.dut.add_out_en[5:0]
+@28
+tb_sobel_conv.dut.add_en
+@22
+tb_sobel_conv.dut.buf_h[6:0]
+tb_sobel_conv.dut.conv_h[5:0]
+tb_sobel_conv.dut.buf_w[6:0]
+tb_sobel_conv.dut.conv_w[5:0]
+tb_sobel_conv.dut.data_in[127:0]
+@28
+tb_sobel_conv.dut.n_state[2:0]
+tb_sobel_conv.dut.c_state[2:0]
+[pattern_trace] 1
+[pattern_trace] 0
