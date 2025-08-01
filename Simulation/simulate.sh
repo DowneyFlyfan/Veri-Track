@@ -1,3 +1,7 @@
+TOP_SV_FILE=../test_benches/tb_sobel_conv.sv
+TOP_MODULE_NAME=$(basename ${TOP_SV_FILE} .sv)
+
+# 3. 运行verilator
 verilator \
     --clk clk \
     --timing \
@@ -7,14 +11,15 @@ verilator \
     -Wno-SELRANGE \
     -Wno-WIDTHTRUNC \
     -Wno-CASEINCOMPLETE \
-    --cc ../test_benches/tb_sobel_conv.sv \
+    --cc ${TOP_SV_FILE} \
     ../Modules/adder_tree.sv \
     ../Modules/sobel_conv.sv \
     --exe sim_main.cc \
     --trace-fst
 
-make -C obj_dir -f Vtb_sobel_conv.mk Vtb_sobel_conv
-./obj_dir/Vtb_sobel_conv
+make -C obj_dir -f V${TOP_MODULE_NAME}.mk V${TOP_MODULE_NAME}
+./obj_dir/V${TOP_MODULE_NAME}
+
 rm -rf obj_dir
 
 nohup gtkwave waveform.fst > /dev/null 2>&1 &
