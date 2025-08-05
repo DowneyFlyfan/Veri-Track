@@ -4,7 +4,7 @@ module tb_sobel_conv;
   // Parameters
   localparam ROI_SIZE = 64;
   localparam ROI_AREA = ROI_SIZE * ROI_SIZE;
-  localparam PORT_BITS = 128;
+  localparam PORT_BITS = 64;
   localparam CLK_PERIOD = 10;
 
   localparam IN_WIDTH = 8;
@@ -86,10 +86,13 @@ module tb_sobel_conv;
     // Initialize signals and load data
     din = '0;
 
-    $readmemh("../texts/input_img.txt", in_img);
-    $readmemh("../texts/kernel.txt", kernel_vec);
+    $readmemh("D:\\Vivado\\Vivado_Projects\\Conv\\Codes\\texts\\input_img.txt", in_img);
+    $readmemh("D:\\Vivado\\Vivado_Projects\\Conv\\Codes\\texts\\kernel.txt", kernel_vec);
 
-    // Reset, 这里有1ns延迟
+    // $readmemh("../texts/input_img.txt", in_img);
+    // $readmemh("../texts/kernel.txt", kernel_vec);
+
+    // Reset
     clk_en  = 1'b1;
     conv_en = 1'b1;
 
@@ -123,7 +126,9 @@ module tb_sobel_conv;
     end
 
     // 4. Write output and finish simulation
-    $writememh("../texts/output_img.txt", out_img, 0);
+    $writememh("D:\\Vivado\\Vivado_Projects\\Conv\\Codes\\texts\\output_img.txt", out_img);
+    // $writememh("../texts\\output_img.txt", out_img, 0);
+
     $display("Output written to output_img.txt! Finishing simulation.");
     $finish;
   end

@@ -16,42 +16,38 @@ module adder_tree #(
   localparam ADDER_SIZE = 2 ** STAGE_NUM;
   localparam HALF_INPUT_NUM = INPUT_NUM / 2;
   logic signed [OUT_WIDTH-1 : 0] adder_tree_data[STAGE_NUM-1 : 0][ADDER_SIZE-1 : 0];
+  logic signed [OUT_WIDTH-1 : 0] din_mat[INPUT_NUM-1:0];
+  logic signed [OUT_WIDTH-1 : 0] zeros;
 
-  // Pipelined Input
   always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       for (int adder = 0; adder < ADDER_SIZE; adder = adder + 1) begin
         adder_tree_data[0][adder] <= '0;
       end
-    end else begin
-      for (int adder = 0; adder < HALF_INPUT_NUM; adder = adder + 1) begin
-        adder_tree_data[0][adder] <= signed'(din[(2*adder+1)*IN_WIDTH-1-:IN_WIDTH]) + signed'(din[(2*adder+2)*IN_WIDTH-1-:IN_WIDTH]);
-      end
-      if (PARITY) begin
-        adder_tree_data[0][HALF_INPUT_NUM] <= signed'(din[(2*HALF_INPUT_NUM+1)*IN_WIDTH-1-:IN_WIDTH]);
-      end
-    end
-  end
-
-  // Pipelined adding
-  genvar stage;
-  generate
-    for (stage = 1; stage < STAGE_NUM; stage = stage + 1) begin
-      localparam CRNT_STAGE_NUM = ADDER_SIZE >> stage;
-      always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-          for (int adder = 0; adder < ADDER_SIZE; adder = adder + 1) begin
-            adder_tree_data[stage][adder] <= '0;
-          end
-        end else begin
-          begin
-            for (int adder = 0; adder < CRNT_STAGE_NUM; adder = adder + 1) begin
-              adder_tree_data[stage][adder] <= adder_tree_data[stage-1][adder*2] + adder_tree_data[stage-1][adder*2+1];
-            end
-            dout <= adder_tree_data[STAGE_NUM-1][0] + adder_tree_data[STAGE_NUM-1][1];
-          end
+      for (int stage = 1; stage < STAGE_NUM; stage = stage + 1) begin
+        for (int adder = 0; adder < ADDER_SIZE; adder = adder + 1) begin
+          adder_tree_data[stage][adder] <= '0;
         end
       end
+    end else begin
+      for (int i = 0; i < INPUT_NUM; i = i + 1) begin
+        din_mat[i] <= signed'(din[(i+1)*IN_WIDTH-1-:IN_WIDTH]);
+      end
+
+      for (int adder = 0; adder < HALF_INPUT_NUM; adder = adder + 1) begin
+        adder_tree_data[0][adder] <= din_mat[2*adder] + din_mat[2*adder+1];
+      end
+      if (PARITY) begin
+        adder_tree_data[0][HALF_INPUT_NUM] <= din_mat[INPUT_NUM-1] + zeros;
+      end
+
+      for (int stage = 1; stage < STAGE_NUM; stage = stage + 1) begin
+        for (int adder = 0; adder < (ADDER_SIZE >> stage); adder = adder + 1) begin
+          adder_tree_data[stage][adder] <= adder_tree_data[stage-1][adder*2] + adder_tree_data[stage-1][adder*2+1];
+        end
+      end
+
+      dout <= adder_tree_data[STAGE_NUM-1][0] + adder_tree_data[STAGE_NUM-1][1];
     end
-  endgenerate
+  end
 endmodule

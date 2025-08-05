@@ -46,7 +46,7 @@ module tb_adder_tree;
         sum = sum + din_unpacked[j];
       end
 
-      repeat (LATENCY) @(posedge clk);
+      repeat (LATENCY) @(negedge clk);
 
       // 3. Check the output
       $display("Test Case %0d:", i + 1);

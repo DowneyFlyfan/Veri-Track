@@ -56,13 +56,13 @@ module sobel_conv #(
   reg [2:0] c_state;
 
   // Enable Signals
-  logic add_en;
+  reg add_en;
 
   // AdderTree
   logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input[NUM_PER_CYCLE-1:0];
 
   // Latency
-  localparam ADDER_LATENCY = $clog2(INPUT_NUM) + 1;
+  localparam ADDER_LATENCY = $clog2(INPUT_NUM) + 2;
   logic [ADDER_LATENCY-1:0] add_out_en;
 
   genvar n, c, h, w;
@@ -85,8 +85,6 @@ module sobel_conv #(
           .dout (data_out[n])
       );
     end
-
-
   endgenerate
 
   // Main Logic
@@ -157,7 +155,7 @@ module sobel_conv #(
           // Read Data
           if (buf_h >= FIRST_RIGHT_PAD_IDX) begin
             for (int n = 0; n < NUM_PER_CYCLE; n = n + 1) begin
-              buffer[KERNEL_SIZE-1][buf_w+n] <= zeros;
+              buffer[KERNEL_SIZE-1][buf_w+n] <= zeros;  // TODO:试试直接用'0
               for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
                 buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
               end
