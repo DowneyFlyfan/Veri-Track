@@ -22,7 +22,6 @@ module tb_sobel_conv;
   // Signals
   logic clk;
   logic clk_en;
-  logic conv_en;
   logic rst_n;
 
   // Memory for file I/O
@@ -50,7 +49,6 @@ module tb_sobel_conv;
       .clk(clk),
       .rst_n(rst_n),
       .clk_en(clk_en),
-      .conv_en(conv_en),
       .data_in(din),
       .kernel(kernel_mat),
       .data_out(dout),
@@ -93,8 +91,7 @@ module tb_sobel_conv;
     // $readmemh("../texts/kernel.txt", kernel_vec);
 
     // Reset
-    clk_en  = 1'b1;
-    conv_en = 1'b1;
+    clk_en = 1'b1;
 
     #1;
     rst_n = 1'b0;

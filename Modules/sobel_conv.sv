@@ -19,7 +19,6 @@ module sobel_conv #(
     input clk,
     input rst_n,
     input clk_en,
-    input conv_en,
     input logic [PORT_BITS - 1:0] data_in,
     input logic signed [KERNEL_DATA_WIDTH - 1:0] kernel[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0],
     output logic signed [OUT_WIDTH-1:0] data_out[NUM_PER_CYCLE - 1:0],
@@ -97,7 +96,7 @@ module sobel_conv #(
       read_en <= 1'b1;
       add_en <= 1'b0;
 
-      add_out_en <= '0;
+      add_out_en <= 0;
       clear_buffer;
     end else if (clk_en) begin
       case (c_state)
@@ -199,7 +198,7 @@ module sobel_conv #(
     end
   endtask
 
-  // State Machine Setting
+  // State Machine
   always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
       c_state <= IDLE;
@@ -213,13 +212,13 @@ module sobel_conv #(
   always_comb begin
     case (c_state)
       IDLE: begin
-        n_state = conv_en ? (conv_out_vld ? IDLE : READ) : IDLE;
+        n_state = conv_out_vld ? IDLE : READ;
       end
       READ: begin
-        n_state = conv_en ? (add_en ? CONV : READ) : IDLE;
+        n_state = add_en ? CONV : READ;
       end
       CONV: begin
-        n_state = conv_en ? (add_en ? CONV : IDLE) : IDLE;
+        n_state = add_en ? CONV : IDLE;
       end
       default: begin
         n_state = IDLE;
