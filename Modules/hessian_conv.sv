@@ -1,14 +1,12 @@
-`timescale 1ns / 100ps
-// WARN:目前只考虑ROI_SIZE是NUM_PER_CYCLE的整数倍
-// WARN: din, dout, n_state, read_en 等需要改一改
+`timescale 1ns / 100ps  // WARN:目前只考虑ROI_SIZE是NUM_PER_CYCLE的整数倍
 
 module hessian_conv #(
     parameter ROI_SIZE = 480,
     parameter PORT_BITS = 64,
     parameter IN_WIDTH = 8,
-    parameter KERNEL_SIZE = 3,
-    parameter KERNEL_DATA_WIDTH = 14,
-    parameter KERNEL_NUM = 2,
+    parameter KERNEL_SIZE = 5,
+    parameter KERNEL_DATA_WIDTH = 16,
+    parameter KERNEL_NUM = 3,
 
     parameter KERNEL_AREA = KERNEL_SIZE * KERNEL_SIZE,
     parameter INPUT_NUM = KERNEL_AREA,
@@ -21,7 +19,7 @@ module hessian_conv #(
     input clk_en,
     input logic [PORT_BITS - 1:0] data_in,
     input logic signed [KERNEL_DATA_WIDTH - 1:0] kernel[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0],
-    output logic signed [OUT_WIDTH-1:0] data_out[NUM_PER_CYCLE - 1:0][KERNEL_NUM-1:0],
+    output logic signed [OUT_WIDTH-1:0] data_out[KERNEL_NUM-1:0][NUM_PER_CYCLE - 1:0],
     output logic conv_out_vld,
     output logic read_en
 );
@@ -80,7 +78,7 @@ module hessian_conv #(
             .clk  (clk),
             .rst_n(rst_n),
             .din  (adder_tree_input[n][c]),
-            .dout (data_out[n][c])
+            .dout (data_out[c][n])
         );
       end
     end

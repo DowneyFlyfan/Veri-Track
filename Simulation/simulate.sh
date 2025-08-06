@@ -1,4 +1,4 @@
-TOP_SV_FILE=../test_benches/tb_sobel_conv.sv
+TOP_SV_FILE=../test_benches/tb_hessian_conv.sv
 TOP_MODULE_NAME=$(basename ${TOP_SV_FILE} .sv)
 
 # 3. 运行verilator
@@ -13,7 +13,7 @@ verilator \
     -Wno-CASEINCOMPLETE \
     --cc ${TOP_SV_FILE} \
     ../Modules/adder_tree.sv \
-    ../Modules/sobel_conv.sv \
+    ../Modules/hessian_conv.sv \
     --exe sim_main.cc \
     --trace-fst
 
