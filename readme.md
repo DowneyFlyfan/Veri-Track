@@ -11,5 +11,6 @@
 | 6ns  | routes avalability | extratimeopt   | 失败 | LUT 96% |
 | 8ns  | routes avalability | extratimeopt   |  WTS=-0.536ns  | LUT > 100% |
 | 7.5ns  | Default | extratimeopt   | 失败 | LUT 96% |
+| 7.5ns(AdderTree更大)  | Default | extratimeopt   | 失败 | LUT 96% |
 | 8ns  | Default | extratimeopt   | WTS=0.001ns | LUT 23% |
 | 8ns  | Default | High Net-Delay | 失败 | LUT 96% |
