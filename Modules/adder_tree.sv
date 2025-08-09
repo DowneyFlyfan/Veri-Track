@@ -27,7 +27,7 @@ module adder_tree #(
         adder_tree_data[0][adder] <= signed'(din[(adder+1)*IN_WIDTH-1-:IN_WIDTH]);
       end
 
-      for (int stage = 1; stage <= STAGE_NUM; stage = stage + 1) begin
+      for (int stage = 1; stage <= STAGE_NUM; stage = stage + 1) begin : adder_tree_stage
         for (int adder = 0; adder < (ADDER_SIZE >> stage); adder = adder + 1) begin
           adder_tree_data[stage][adder] <= adder_tree_data[stage-1][adder*2] + adder_tree_data[stage-1][adder*2+1];
         end
