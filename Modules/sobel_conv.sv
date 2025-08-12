@@ -104,7 +104,7 @@ module sobel_conv #(
       counter <= 0;
 
       add_out_en <= 0;
-      clear_buffer;
+      clr;
     end else if (clk_en) begin
       add_out_en <= {add_out_en[ADDER_LATENCY-2:0], add_en};
       conv_out_vld <= add_out_en[ADDER_LATENCY-1];  // WARN: 和其他器件连在一起的时候还是要连续赋值!!
@@ -122,7 +122,7 @@ module sobel_conv #(
           add_en <= 1'b0;
           counter <= '0;
 
-          clear_buffer;
+          clr;
         end
 
         READ: begin
@@ -218,11 +218,20 @@ module sobel_conv #(
     end
   end
 
-  task clear_buffer;
+  task clr;
     integer h, w;
     for (h = 0; h < KERNEL_SIZE; h = h + 1) begin
       for (w = 0; w < BUF_WIDTH; w = w + 1) begin
-        buffer[h][w] <= '0;
+        buffer[h][w] <= 0;
+      end
+    end
+    for (int n = 0; n < PIXELS_OUT_PER_CYCLE; n++) begin
+      for (int c = 0; c < KERNEL_NUM; c++) begin
+        for (int h = 0; h < KERNEL_SIZE; h++) begin
+          for (int w = 0; w < KERNEL_SIZE; w++) begin
+            conv_mat[n][c][h][w] <= 0;
+          end
+        end
       end
     end
   endtask
