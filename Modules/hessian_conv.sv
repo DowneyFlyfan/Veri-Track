@@ -1,5 +1,6 @@
 `timescale 1ns / 100ps
 // WARN:目前只考虑ROI_SIZE是IN_NUM_PER_CYCLE的整数倍
+// WARN:结果需要左移15位
 
 module hessian_conv #(
     parameter ROI_SIZE = 480,
@@ -78,7 +79,8 @@ module hessian_conv #(
         end
         adder_tree #(
             .INPUT_NUM(INPUT_NUM),
-            .IN_WIDTH (MULTIPLIED_WIDTH)
+            .IN_WIDTH(MULTIPLIED_WIDTH),
+            .SHIFT(1)
         ) adder_tree_inst (
             .clk  (clk),
             .rst_n(rst_n),

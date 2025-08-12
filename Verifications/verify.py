@@ -222,11 +222,9 @@ class TbMachine:
 
         try:
             expected_output = read_hex_file(
-                expected_path, out_width, kernel_frac_width
+                expected_path, out_width, fractional_bits=kernel_frac_width
             ).reshape(img_shape)
-            verilog_output = read_hex_file(
-                verilog_path, out_width, kernel_frac_width
-            ).reshape(img_shape)
+            verilog_output = read_hex_file(verilog_path, out_width).reshape(img_shape)
 
             self._plot_results(expected_output.flatten(), verilog_output.flatten())
 

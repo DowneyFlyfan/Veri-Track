@@ -3,8 +3,9 @@
 // WARN: 使用之前一定要进行一次Reset
 module adder_tree #(
     parameter INPUT_NUM = 18,
-    parameter IN_WIDTH  = 12,
-    parameter OUT_WIDTH = IN_WIDTH + $clog2(INPUT_NUM)
+    parameter IN_WIDTH = 12,
+    parameter OUT_WIDTH = IN_WIDTH + $clog2(INPUT_NUM),
+    parameter SHIFT = 0
 ) (
     input logic clk,
     input logic rst_n,
@@ -34,5 +35,9 @@ module adder_tree #(
       end
     end
   end
-  assign dout = adder_tree_data[STAGE_NUM][0];
+  if (SHIFT) begin
+    assign dout = adder_tree_data[STAGE_NUM][0] >>> 15;
+  end else begin
+    assign dout = adder_tree_data[STAGE_NUM][0];
+  end
 endmodule

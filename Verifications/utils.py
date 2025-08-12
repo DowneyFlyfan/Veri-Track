@@ -7,24 +7,23 @@ def to_hex(val, width):
     num_hex_chars = (width + 3) // 4
     if val < 0:
         val = (1 << width) + val
-    return format(val, f'0{num_hex_chars}x')
+    return format(val, f"0{num_hex_chars}x")
 
 
 def write_to_file(data, filename, width, fractional_bits=0):
     """Writes numpy data to a file in hex format."""
     with open(filename, "w") as f:
         flattened_data = data.flatten()
-        
+
         if np.issubdtype(flattened_data.dtype, np.floating):
             if fractional_bits > 0:
                 scale_factor = 2**fractional_bits
                 scaled_data = [int(round(val * scale_factor)) for val in flattened_data]
             else:
-                # If it's float but no fractional bits, just round it.
                 scaled_data = [int(round(val)) for val in flattened_data]
         else:
             scaled_data = [int(val) for val in flattened_data]
-        
+
         for int_val in scaled_data:
             f.write(f"{to_hex(int_val, width)}\n")
 
@@ -39,7 +38,7 @@ def read_hex_file(filename, width, fractional_bits=0):
         val = int(hex_val, 16)
         if (val >> (width - 1)) & 1:  # Check sign bit
             val -= 1 << width  # Convert to negative
-        
+
         if fractional_bits > 0:
             scale_factor = float(1 << fractional_bits)
             values.append(float(val) / scale_factor)
