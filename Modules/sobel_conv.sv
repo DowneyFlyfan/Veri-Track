@@ -33,17 +33,18 @@ module sobel_conv #(
 
   localparam HW_BITS = $clog2(ROI_SIZE);
   localparam BUF_WIDTH_BITS = $clog2(BUF_WIDTH);
+  localparam FLAG_BITS = $clog2(KERNEL_SIZE);
 
   localparam FIRST_RIGHT_PAD_IDX = ROI_SIZE + PAD_SIZE;
 
   // Buffers, Conv Matrix, Zeros
   logic signed [IN_WIDTH - 1:0] buffer[KERNEL_SIZE-1:0][BUF_WIDTH-1:0];
   logic signed [MULTIPLIED_WIDTH-1:0] conv_mat[PIXELS_OUT_PER_CYCLE-1:0][KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0];
-  logic [PORT_BITS-1:0] zeros = 0;
 
   // Indices
-  logic [BUF_WIDTH_BITS - 1:0] buf_w, buf_h;
+  logic [BUF_WIDTH_BITS - 1:0] read_w, read_h;
   logic [HW_BITS-1:0] conv_w, conv_h;  // Index for Conv Kernel on Top Left
+  logic [FLAG_BITS-1:0] conv_flag, buf_h;
 
   // State Machine
   localparam IDLE = 3'b1;
@@ -93,11 +94,14 @@ module sobel_conv #(
     if (~rst_n) begin
       conv_h <= 0;
       conv_w <= 0;
-      buf_w <= PAD_SIZE;
+      read_w <= PAD_SIZE;
+      read_h <= PAD_SIZE;
       buf_h <= PAD_SIZE;
+      conv_flag <= 0;
+
       ready <= 1'b1;
       add_en <= 1'b0;
-      counter <= '0;
+      counter <= 0;
 
       add_out_en <= 0;
       clear_buffer;
@@ -107,12 +111,15 @@ module sobel_conv #(
 
       case (c_state)
         IDLE: begin  // NOTE: 少了一个add_out_en
-          conv_h  <= 0;
-          conv_w  <= 0;
-          buf_w   <= PAD_SIZE;
-          buf_h   <= PAD_SIZE;
-          ready   <= conv_out_vld ? 1'b0 : 1'b1;
-          add_en  <= 1'b0;
+          conv_h <= 0;
+          conv_w <= 0;
+          read_w <= PAD_SIZE;
+          read_h <= PAD_SIZE;
+          buf_h <= PAD_SIZE;
+          conv_flag <= 0;
+
+          ready <= conv_out_vld ? 1'b0 : 1'b1;
+          add_en <= 1'b0;
           counter <= '0;
 
           clear_buffer;
@@ -121,21 +128,24 @@ module sobel_conv #(
         READ: begin
           // Read Data
           for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
-            buffer[KERNEL_SIZE-1][buf_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
-            for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
-              buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
+            buffer[buf_h][read_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
+          end
+
+          // Update Buffer Index & Conv Flag
+          if (read_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin
+            read_w <= PAD_SIZE;
+            read_h <= read_h + 1;
+            if (buf_h == KERNEL_SIZE - 1) begin
+              buf_h <= 0;
+            end else begin
+              buf_h <= buf_h + 1;
             end
-          end
 
-          // Update Buffer Index
-          if (buf_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin  // Last Column of Buffer
-            buf_w <= PAD_SIZE;
-            buf_h <= buf_h + 1;
           end else begin  // Normal Condition
-            buf_w <= buf_w + IN_NUM_PER_CYCLE;
+            read_w <= read_w + IN_NUM_PER_CYCLE;
           end
 
-          if (buf_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX && buf_h == KERNEL_SIZE - 2) begin: to_conv
+          if (read_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX && read_h == KERNEL_SIZE - 2) begin: to_conv
             add_en <= 1'b1;
           end
         end
@@ -150,6 +160,11 @@ module sobel_conv #(
           end
 
           if (conv_w + PIXELS_OUT_PER_CYCLE == ROI_SIZE) begin : conv_index_update
+            if (conv_flag == KERNEL_SIZE - 1) begin
+              conv_flag <= 0;
+            end else begin
+              conv_flag <= conv_flag + 1;
+            end
             conv_w <= 0;
             conv_h <= conv_h + 1;
           end else begin
@@ -157,26 +172,25 @@ module sobel_conv #(
           end
 
           if (ready) begin : read_data_and_buffer_index_update
-            if (buf_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin : buffer_index_update
-              buf_w <= PAD_SIZE;
-              buf_h <= buf_h + 1;
+            if (read_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin : buffer_index_update
+              read_w <= PAD_SIZE;
+              read_h <= read_h + 1;
+              if (buf_h == KERNEL_SIZE - 1) begin
+                buf_h <= 0;
+              end else begin
+                buf_h <= buf_h + 1;
+              end
             end else begin  // Normal Condition
-              buf_w <= buf_w + IN_NUM_PER_CYCLE;
+              read_w <= read_w + IN_NUM_PER_CYCLE;
             end
 
-            if (buf_h >= FIRST_RIGHT_PAD_IDX) begin
+            if (read_h >= FIRST_RIGHT_PAD_IDX) begin : read_data
               for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
-                buffer[KERNEL_SIZE-1][buf_w+n] <= zeros;
-                for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
-                  buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
-                end
+                buffer[buf_h][read_w+n] <= '0;
               end
             end else begin
               for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
-                buffer[KERNEL_SIZE-1][buf_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
-                for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
-                  buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
-                end
+                buffer[buf_h][read_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
               end
             end
           end
@@ -185,7 +199,11 @@ module sobel_conv #(
             for (int c = 0; c < KERNEL_NUM; c = c + 1) begin
               for (int h = 0; h < KERNEL_SIZE; h = h + 1) begin
                 for (int w = 0; w < KERNEL_SIZE; w = w + 1) begin
-                  conv_mat[n][c][h][w] <= buffer[h][n+w+conv_w] * kernel[c][h][w];
+                  if (h >= conv_flag) begin
+                    conv_mat[n][c][h][w] <= buffer[h][n+w+conv_w] * kernel[c][h-conv_flag][w];
+                  end else begin
+                    conv_mat[n][c][h][w] <= buffer[h][n+w+conv_w] * kernel[c][h-conv_flag + KERNEL_SIZE][w];
+                  end
                 end
               end
             end
@@ -200,7 +218,7 @@ module sobel_conv #(
     end
   end
 
-  task automatic clear_buffer;  // WARN: 改成公用的会不会有问题, 似乎没有影响
+  task clear_buffer;
     integer h, w;
     for (h = 0; h < KERNEL_SIZE; h = h + 1) begin
       for (w = 0; w < BUF_WIDTH; w = w + 1) begin

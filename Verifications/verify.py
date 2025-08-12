@@ -266,7 +266,10 @@ def main():
     )
     parser.add_argument("--in_width", type=int, default=8, help="Input data width.")
     parser.add_argument(
-        "--path", type=str, default="..\\texts\\", help="Path to text files."
+        "--path",
+        type=str,
+        default="../texts/" if os.name == "posix" else "..\\texts\\",
+        help="Path to text files.",
     )
 
     args = parser.parse_args()
