@@ -8,7 +8,7 @@ module sobel_conv #(
     parameter KERNEL_SIZE = 3,
     parameter KERNEL_DATA_WIDTH = 4,
     parameter KERNEL_NUM = 2,
-    parameter PIXELS_OUT_PER_CYCLE = 4,
+    parameter PIXELS_OUT_PER_CYCLE = 2,
 
     parameter KERNEL_AREA = KERNEL_SIZE * KERNEL_SIZE,
     parameter INPUT_NUM = KERNEL_AREA * KERNEL_NUM,
@@ -39,7 +39,7 @@ module sobel_conv #(
   // Buffers, Conv Matrix, Zeros
   logic signed [IN_WIDTH - 1:0] buffer[KERNEL_SIZE-1:0][BUF_WIDTH-1:0];
   logic signed [MULTIPLIED_WIDTH-1:0] conv_mat[PIXELS_OUT_PER_CYCLE-1:0][KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0];
-  // logic [PORT_BITS-1:0] zeros = 0;
+  logic [PORT_BITS-1:0] zeros = 0;
 
   // Indices
   logic [BUF_WIDTH_BITS - 1:0] buf_w, buf_h;
@@ -156,7 +156,6 @@ module sobel_conv #(
             conv_w <= conv_w + PIXELS_OUT_PER_CYCLE;
           end
 
-          // TODO: 读数据合并成?:
           if (ready) begin : read_data_and_buffer_index_update
             if (buf_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin : buffer_index_update
               buf_w <= PAD_SIZE;
@@ -165,15 +164,15 @@ module sobel_conv #(
               buf_w <= buf_w + IN_NUM_PER_CYCLE;
             end
 
-            if (buf_h >= FIRST_RIGHT_PAD_IDX) begin : read_zeros
+            if (buf_h >= FIRST_RIGHT_PAD_IDX) begin
               for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
-                buffer[KERNEL_SIZE-1][buf_w+n] <= '0;  // TODO:试试直接用'0
+                buffer[KERNEL_SIZE-1][buf_w+n] <= zeros;
                 for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
                   buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
                 end
               end
             end else begin
-              for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin : read_inputs
+              for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
                 buffer[KERNEL_SIZE-1][buf_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
                 for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
                   buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
@@ -201,7 +200,7 @@ module sobel_conv #(
     end
   end
 
-  task clear_buffer;  // WARN: 改成公用的会不会有问题
+  task automatic clear_buffer;  // WARN: 改成公用的会不会有问题, 似乎没有影响
     integer h, w;
     for (h = 0; h < KERNEL_SIZE; h = h + 1) begin
       for (w = 0; w < BUF_WIDTH; w = w + 1) begin

@@ -2,7 +2,7 @@
 
 module hessian_conv #(
     parameter ROI_SIZE = 480,
-    parameter PORT_BITS = 64,
+    parameter PORT_BITS = 32,
     parameter IN_WIDTH = 8,
     parameter KERNEL_SIZE = 5,
     parameter KERNEL_DATA_WIDTH = 16,
