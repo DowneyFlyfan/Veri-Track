@@ -61,7 +61,7 @@ module sobel_conv #(
   reg [COUNTER_BITS-1:0] counter;
 
   // AdderTree
-  logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input[IN_NUM_PER_CYCLE-1:0];
+  logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input[PIXELS_OUT_PER_CYCLE-1:0];
 
   // Latency
   localparam ADDER_LATENCY = $clog2(INPUT_NUM) + 2;

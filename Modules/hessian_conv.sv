@@ -1,27 +1,30 @@
-`timescale 1ns / 100ps  // WARN:目前只考虑ROI_SIZE是NUM_PER_CYCLE的整数倍
+`timescale 1ns / 100ps
+// WARN:目前只考虑ROI_SIZE是IN_NUM_PER_CYCLE的整数倍
 
 module hessian_conv #(
     parameter ROI_SIZE = 480,
-    parameter PORT_BITS = 32,
+    parameter PORT_BITS = 128,
     parameter IN_WIDTH = 8,
     parameter KERNEL_SIZE = 5,
     parameter KERNEL_DATA_WIDTH = 16,
     parameter KERNEL_NUM = 3,
+    parameter PIXELS_OUT_PER_CYCLE = 2,
 
     parameter KERNEL_AREA = KERNEL_SIZE * KERNEL_SIZE,
     parameter INPUT_NUM = KERNEL_AREA,
     parameter MULTIPLIED_WIDTH = IN_WIDTH + KERNEL_DATA_WIDTH,
     parameter OUT_WIDTH = MULTIPLIED_WIDTH + $clog2(INPUT_NUM),
-    parameter NUM_PER_CYCLE = PORT_BITS / IN_WIDTH
+    parameter IN_NUM_PER_CYCLE = PORT_BITS / IN_WIDTH,
+    parameter READ_CONV_RATIO = IN_NUM_PER_CYCLE / PIXELS_OUT_PER_CYCLE
 ) (
     input clk,
     input rst_n,
     input clk_en,
     input logic [PORT_BITS - 1:0] data_in,
     input logic signed [KERNEL_DATA_WIDTH - 1:0] kernel[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0],
-    output logic signed [OUT_WIDTH-1:0] data_out[KERNEL_NUM-1:0][NUM_PER_CYCLE - 1:0],
+    output logic signed [OUT_WIDTH-1:0] data_out[KERNEL_NUM-1:0][PIXELS_OUT_PER_CYCLE- 1:0],
     output logic conv_out_vld,
-    output logic read_en
+    output logic ready
 );
 
   // Params
@@ -30,20 +33,18 @@ module hessian_conv #(
 
   localparam HW_BITS = $clog2(ROI_SIZE);
   localparam BUF_WIDTH_BITS = $clog2(BUF_WIDTH);
-  localparam KERNEL_BITS = $clog2(KERNEL_SIZE);
+  localparam FLAG_BITS = $clog2(KERNEL_SIZE);
 
   localparam FIRST_RIGHT_PAD_IDX = ROI_SIZE + PAD_SIZE;
-  localparam IMG_BOTTOM_KERNEL_IDX = BUF_WIDTH - PAD_SIZE - KERNEL_SIZE;
-  localparam CONV_MAT_RIGHT_IDX = NUM_PER_CYCLE - PAD_SIZE;
 
-  // Buffers, Conv Matrix, Zeros
+  // Buffers, Conv Matrix
   logic signed [IN_WIDTH - 1:0] buffer[KERNEL_SIZE-1:0][BUF_WIDTH-1:0];
-  logic signed [MULTIPLIED_WIDTH-1:0] conv_mat[NUM_PER_CYCLE-1:0][KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0];
-  // logic [PORT_BITS-1:0] zeros = 0;
+  logic signed [MULTIPLIED_WIDTH-1:0] conv_mat[PIXELS_OUT_PER_CYCLE-1:0][KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0];
 
   // Indices
-  logic [BUF_WIDTH_BITS - 1:0] buf_w, buf_h;
+  logic [BUF_WIDTH_BITS - 1:0] read_w, read_h;
   logic [HW_BITS-1:0] conv_w, conv_h;  // Index for Conv Kernel on Top Left
+  logic [FLAG_BITS-1:0] conv_flag, buf_h;
 
   // State Machine
   localparam IDLE = 3'b1;
@@ -55,8 +56,12 @@ module hessian_conv #(
   // Enable Signals
   reg add_en;
 
-  // Adder Tree
-  logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input[NUM_PER_CYCLE-1:0][KERNEL_NUM-1:0];
+  // Counter
+  localparam COUNTER_BITS = $clog2(READ_CONV_RATIO);
+  reg [COUNTER_BITS-1:0] counter;
+
+  // AdderTree
+  logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input[PIXELS_OUT_PER_CYCLE-1:0][KERNEL_NUM-1:0];
 
   // Latency
   localparam ADDER_LATENCY = $clog2(INPUT_NUM) + 2;
@@ -64,7 +69,7 @@ module hessian_conv #(
 
   genvar n, c, h, w;
   generate
-    for (n = 0; n < NUM_PER_CYCLE; n = n + 1) begin
+    for (n = 0; n < PIXELS_OUT_PER_CYCLE; n = n + 1) begin
       for (c = 0; c < KERNEL_NUM; c = c + 1) begin
         for (h = 0; h < KERNEL_SIZE; h = h + 1) begin
           for (w = 0; w < KERNEL_SIZE; w = w + 1) begin
@@ -89,96 +94,122 @@ module hessian_conv #(
     if (~rst_n) begin
       conv_h <= 0;
       conv_w <= 0;
-      buf_w <= PAD_SIZE;
+      read_w <= PAD_SIZE;
+      read_h <= PAD_SIZE;
       buf_h <= PAD_SIZE;
-      read_en <= 1'b1;
+      conv_flag <= 0;
+
+      ready <= 1'b1;
       add_en <= 1'b0;
+      counter <= 0;
 
       add_out_en <= 0;
-      clear_buffer;
+      clr;
     end else if (clk_en) begin
+      add_out_en <= {add_out_en[ADDER_LATENCY-2:0], add_en};
+      conv_out_vld <= add_out_en[ADDER_LATENCY-1];  // WARN: 和其他器件连在一起的时候还是要连续赋值!!
+
       case (c_state)
         IDLE: begin  // NOTE: 少了一个add_out_en
-          conv_h  <= 0;
-          conv_w  <= 0;
-          buf_w   <= PAD_SIZE;
-          buf_h   <= PAD_SIZE;
-          read_en <= conv_out_vld ? 1'b0 : 1'b1;
-          add_en  <= 1'b0;
+          conv_h <= 0;
+          conv_w <= 0;
+          read_w <= PAD_SIZE;
+          read_h <= PAD_SIZE;
+          buf_h <= PAD_SIZE;
+          conv_flag <= 0;
 
-          clear_buffer;
+          ready <= conv_out_vld ? 1'b0 : 1'b1;
+          add_en <= 1'b0;
+          counter <= '0;
+
+          clr;
         end
 
         READ: begin
           // Read Data
-          for (int n = 0; n < NUM_PER_CYCLE; n = n + 1) begin
-            buffer[KERNEL_SIZE-1][buf_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
-            for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
-              buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
+          for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
+            buffer[buf_h][read_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
+          end
+
+          // Update Buffer Index & Conv Flag
+          if (read_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin
+            read_w <= PAD_SIZE;
+            read_h <= read_h + 1;
+            if (buf_h == KERNEL_SIZE - 1) begin
+              buf_h <= 0;
+            end else begin
+              buf_h <= buf_h + 1;
             end
-          end
 
-          // Update Buffer Index
-          if (buf_w + NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin  // Last Column of Buffer
-            buf_w <= PAD_SIZE;
-            buf_h <= buf_h + 1;
           end else begin  // Normal Condition
-            buf_w <= buf_w + NUM_PER_CYCLE;
+            read_w <= read_w + IN_NUM_PER_CYCLE;
           end
 
-          // To Conv
-          if (buf_w == PAD_SIZE && buf_h == KERNEL_SIZE - 1) begin
+          if (read_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX && read_h == KERNEL_SIZE - 2) begin: to_conv
             add_en <= 1'b1;
           end
         end
 
         CONV: begin
-          // Update Buffer Index
-          if (buf_w + NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin  // Last Column of Buffer
-            buf_w <= PAD_SIZE;
-            buf_h <= buf_h + 1;
-          end else begin  // Normal Condition
-            buf_w <= buf_w + NUM_PER_CYCLE;
+          if (counter == READ_CONV_RATIO - 1) begin : read_or_not
+            counter <= '0;
+            ready   <= 1'b1;
+          end else begin
+            counter <= counter + 1;
+            ready   <= 1'b0;
           end
 
-          // Update Conv Index
-          if (conv_w + NUM_PER_CYCLE == ROI_SIZE) begin
+          if (conv_w + PIXELS_OUT_PER_CYCLE == ROI_SIZE) begin : conv_index_update
+            if (conv_flag == KERNEL_SIZE - 1) begin
+              conv_flag <= 0;
+            end else begin
+              conv_flag <= conv_flag + 1;
+            end
             conv_w <= 0;
             conv_h <= conv_h + 1;
           end else begin
-            conv_w <= conv_w + NUM_PER_CYCLE;
+            conv_w <= conv_w + PIXELS_OUT_PER_CYCLE;
           end
 
-          // Read Data
-          if (buf_h >= FIRST_RIGHT_PAD_IDX) begin
-            for (int n = 0; n < NUM_PER_CYCLE; n = n + 1) begin
-              buffer[KERNEL_SIZE-1][buf_w+n] <= '0;  // TODO:试试直接用'0
-              for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
-                buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
+          if (ready) begin : read_data_and_buffer_index_update
+            if (read_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX) begin : buffer_index_update
+              read_w <= PAD_SIZE;
+              read_h <= read_h + 1;
+              if (buf_h == KERNEL_SIZE - 1) begin
+                buf_h <= 0;
+              end else begin
+                buf_h <= buf_h + 1;
               end
+            end else begin  // Normal Condition
+              read_w <= read_w + IN_NUM_PER_CYCLE;
             end
-          end else begin
-            for (int n = 0; n < NUM_PER_CYCLE; n = n + 1) begin
-              buffer[KERNEL_SIZE-1][buf_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
-              for (int h = 0; h < KERNEL_SIZE - 1; h = h + 1) begin
-                buffer[h][buf_w+n] <= buffer[h+1][buf_w+n];
+
+            if (read_h >= FIRST_RIGHT_PAD_IDX) begin : read_data
+              for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
+                buffer[buf_h][read_w+n] <= '0;
+              end
+            end else begin
+              for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
+                buffer[buf_h][read_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
               end
             end
           end
 
-          // Conv
-          for (int n = 0; n < NUM_PER_CYCLE; n = n + 1) begin
+          for (int n = 0; n < PIXELS_OUT_PER_CYCLE; n = n + 1) begin : conv
             for (int c = 0; c < KERNEL_NUM; c = c + 1) begin
               for (int h = 0; h < KERNEL_SIZE; h = h + 1) begin
                 for (int w = 0; w < KERNEL_SIZE; w = w + 1) begin
-                  conv_mat[n][c][h][w] <= buffer[h][n+w+conv_w] * kernel[c][h][w];
+                  if (h >= conv_flag) begin
+                    conv_mat[n][c][h][w] <= buffer[h][n+w+conv_w] * kernel[c][h-conv_flag][w];
+                  end else begin
+                    conv_mat[n][c][h][w] <= buffer[h][n+w+conv_w] * kernel[c][h-conv_flag + KERNEL_SIZE][w];
+                  end
                 end
               end
             end
           end
 
-          // To IDLE
-          if (conv_h == ROI_SIZE - 1 && conv_w == ROI_SIZE - 2 * NUM_PER_CYCLE) begin
+          if (conv_h == ROI_SIZE - 1 && conv_w == ROI_SIZE - 2 * PIXELS_OUT_PER_CYCLE) begin : to_IDLE
             add_en <= 1'b0;
           end
         end
@@ -187,11 +218,20 @@ module hessian_conv #(
     end
   end
 
-  task clear_buffer;
+  task clr;
     integer h, w;
     for (h = 0; h < KERNEL_SIZE; h = h + 1) begin
       for (w = 0; w < BUF_WIDTH; w = w + 1) begin
-        buffer[h][w] <= '0;
+        buffer[h][w] <= 0;
+      end
+    end
+    for (int n = 0; n < PIXELS_OUT_PER_CYCLE; n++) begin
+      for (int c = 0; c < KERNEL_NUM; c++) begin
+        for (int h = 0; h < KERNEL_SIZE; h++) begin
+          for (int w = 0; w < KERNEL_SIZE; w++) begin
+            conv_mat[n][c][h][w] <= 0;
+          end
+        end
       end
     end
   endtask
@@ -201,8 +241,6 @@ module hessian_conv #(
     if (~rst_n) begin
       c_state <= IDLE;
     end else if (clk_en) begin
-      add_out_en <= {add_out_en[ADDER_LATENCY-2:0], add_en};
-      conv_out_vld <= add_out_en[ADDER_LATENCY-1];  // WARN: 和其他器件连在一起的时候还是要连续赋值!!
       c_state <= n_state;
     end
   end

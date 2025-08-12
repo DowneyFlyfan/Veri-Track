@@ -4,20 +4,19 @@ module tb_hessian_conv;
   // Parameters
   localparam ROI_SIZE = 64;
   localparam ROI_AREA = ROI_SIZE * ROI_SIZE;
-  localparam PORT_BITS = 128;
+  localparam PORT_BITS = 64;
 
   localparam KERNEL_SIZE = 5;
-  localparam KERNEL_AREA = KERNEL_SIZE * KERNEL_SIZE;
   localparam PAD_SIZE = (KERNEL_SIZE - 1) / 2;
   localparam KERNEL_NUM = 3;
+  localparam KERNEL_AREA = KERNEL_SIZE * KERNEL_SIZE;
 
   localparam IN_WIDTH = 8;
   localparam KERNEL_DATA_WIDTH = 16;
   localparam OUT_WIDTH = IN_WIDTH + KERNEL_DATA_WIDTH + $clog2(KERNEL_AREA);
 
-  localparam IN_NUM_PER_CYCLE = PORT_BITS / IN_WIDTH;
+  localparam NUM_PER_CYCLE = PORT_BITS / IN_WIDTH;
   localparam CLK_PERIOD = 10;
-  localparam PIXELS_OUT_PER_CYCLE = 2;
 
   // Signals
   logic clk;
@@ -31,10 +30,10 @@ module tb_hessian_conv;
   // DUT I/O
   logic signed [KERNEL_DATA_WIDTH-1:0] kernel_mat[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0];
   logic signed [PORT_BITS-1:0] din;
-  logic signed [OUT_WIDTH-1:0] dout[KERNEL_NUM-1:0][PIXELS_OUT_PER_CYCLE- 1:0];
+  logic signed [OUT_WIDTH-1:0] dout[KERNEL_NUM-1:0][NUM_PER_CYCLE - 1:0];
   logic signed [OUT_WIDTH-1:0] out_img[KERNEL_NUM-1:0][ROI_AREA-1:0];
   logic conv_out_vld;
-  logic ready;
+  logic read_en;
   integer in_pixel_idx;
   integer out_pixel_idx;
 
@@ -44,8 +43,7 @@ module tb_hessian_conv;
       .IN_WIDTH(IN_WIDTH),
       .KERNEL_SIZE(KERNEL_SIZE),
       .KERNEL_DATA_WIDTH(KERNEL_DATA_WIDTH),
-      .KERNEL_NUM(KERNEL_NUM),
-      .PIXELS_OUT_PER_CYCLE(PIXELS_OUT_PER_CYCLE)
+      .KERNEL_NUM(KERNEL_NUM)
   ) dut (
       .clk(clk),
       .rst_n(rst_n),
@@ -54,7 +52,7 @@ module tb_hessian_conv;
       .kernel(kernel_mat),
       .data_out(dout),
       .conv_out_vld(conv_out_vld),
-      .ready(ready)
+      .read_en(read_en)
   );
 
   // Clock generation
@@ -102,12 +100,12 @@ module tb_hessian_conv;
     while (out_pixel_idx < ROI_AREA) begin
       // Drive inputs When enabled
       @(negedge clk);
-      if (ready) begin
-        if (in_pixel_idx < ROI_AREA) begin
-          for (int i = 0; i < IN_NUM_PER_CYCLE; i++) begin
+      if (read_en) begin
+        if (in_pixel_idx < ROI_SIZE * ROI_SIZE) begin
+          for (int i = 0; i < NUM_PER_CYCLE; i++) begin
             din[(i+1)*IN_WIDTH-1-:IN_WIDTH] = signed'(in_img[in_pixel_idx+i]);
           end
-          in_pixel_idx = in_pixel_idx + IN_NUM_PER_CYCLE;
+          in_pixel_idx = in_pixel_idx + NUM_PER_CYCLE;
         end else begin  // Send zeros
           din = '0;
         end
@@ -116,11 +114,11 @@ module tb_hessian_conv;
       // Capture outputs when valid
       if (conv_out_vld) begin
         for (int i = 0; i < KERNEL_NUM; i++) begin
-          for (int j = 0; j < PIXELS_OUT_PER_CYCLE; j++) begin
+          for (int j = 0; j < NUM_PER_CYCLE; j++) begin
             out_img[i][out_pixel_idx+j] = dout[i][j];
           end
         end
-        out_pixel_idx = out_pixel_idx + PIXELS_OUT_PER_CYCLE;
+        out_pixel_idx = out_pixel_idx + NUM_PER_CYCLE;
       end
     end
 
