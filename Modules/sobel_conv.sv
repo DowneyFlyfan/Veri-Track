@@ -113,7 +113,7 @@ module sobel_conv #(
 
   // Main Logic
   always_ff @(posedge clk or negedge rst_n) begin
-    if (~rst_n) begin
+    if (~rst_n) begin  // TODO:消除IDLE的繁杂逻辑
       conv_h <= 0;
       conv_w <= 0;
       read_w <= PAD_SIZE;
@@ -301,18 +301,3 @@ module sobel_conv #(
     endcase
   end
 endmodule
-
-// module sobel_out (
-//   clka,
-//   ena,
-//   wea,
-//   addra,
-//   dina,
-//   douta,
-//   clkb,
-//   enb,
-//   web,
-//   addrb,
-//   dinb,
-//   doutb
-// );
