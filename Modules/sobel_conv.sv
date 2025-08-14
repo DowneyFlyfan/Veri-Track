@@ -275,7 +275,6 @@ module sobel_conv #(
     end
   endtask
 
-
   // State Machine
   always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
