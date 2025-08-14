@@ -301,3 +301,18 @@ module sobel_conv #(
     endcase
   end
 endmodule
+
+// module sobel_out (
+//   clka,
+//   ena,
+//   wea,
+//   addra,
+//   dina,
+//   douta,
+//   clkb,
+//   enb,
+//   web,
+//   addrb,
+//   dinb,
+//   doutb
+// );
