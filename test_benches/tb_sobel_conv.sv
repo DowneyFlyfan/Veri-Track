@@ -10,7 +10,7 @@ module tb_sobel_conv;
 
   localparam IN_WIDTH = 8;
   localparam KERNEL_DATA_WIDTH = 4;
-  localparam OUT_WIDTH = IN_WIDTH + KERNEL_DATA_WIDTH + $clog2(CORE_NUM);
+  localparam OUT_WIDTH = IN_WIDTH + 4;
 
   localparam KERNEL_SIZE = 3;
   localparam PAD_SIZE = (KERNEL_SIZE - 1) / 2;
@@ -27,14 +27,15 @@ module tb_sobel_conv;
 
   // Memory for file I/O
   reg signed [KERNEL_DATA_WIDTH-1:0] kernel_vec[KERNEL_NUM*KERNEL_SIZE*KERNEL_SIZE-1:0];
-  reg signed [IN_WIDTH-1:0] in_img[ROI_AREA-1:0];
+  reg [IN_WIDTH-1:0] in_img[ROI_AREA-1:0];
 
   // DUT I/O
   logic signed [KERNEL_DATA_WIDTH-1:0] kernel_mat[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0];
-  logic signed [PORT_BITS-1:0] din;
+  logic [PORT_BITS-1:0] din;
   logic signed [OUT_WIDTH-1:0] dout[PIXELS_OUT_PER_CYCLE- 1:0];
+  logic signed [OUT_WIDTH-1:0] max;
   logic signed [OUT_WIDTH-1:0] out_img[ROI_AREA-1:0];
-  logic conv_out_vld;
+  logic valid;
   logic ready;
   integer in_pixel_idx;
   integer out_pixel_idx;
@@ -54,8 +55,9 @@ module tb_sobel_conv;
       .data_in(din),
       .kernel(kernel_mat),
       .data_out(dout),
-      .conv_out_vld(conv_out_vld),
-      .ready(ready)
+      .valid(valid),
+      .ready(ready),
+      .max(max)
   );
 
   // Clock generation
@@ -106,7 +108,7 @@ module tb_sobel_conv;
       if (ready) begin
         if (in_pixel_idx < ROI_AREA) begin
           for (int i = 0; i < IN_NUM_PER_CYCLE; i++) begin
-            din[(i+1)*IN_WIDTH-1-:IN_WIDTH] = signed'(in_img[in_pixel_idx+i]);
+            din[(i+1)*IN_WIDTH-1-:IN_WIDTH] = in_img[in_pixel_idx+i];
           end
           in_pixel_idx = in_pixel_idx + IN_NUM_PER_CYCLE;
         end else begin  // Send zeros
@@ -115,7 +117,7 @@ module tb_sobel_conv;
       end
 
       // Capture outputs when valid
-      if (conv_out_vld) begin
+      if (valid) begin
         for (int i = 0; i < PIXELS_OUT_PER_CYCLE; i++) begin
           out_img[out_pixel_idx+i] = dout[i];
         end

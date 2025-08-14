@@ -24,7 +24,7 @@ module hessian_conv #(
     input logic [PORT_BITS - 1:0] data_in,
     input logic signed [KERNEL_DATA_WIDTH - 1:0] kernel[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0],
     output logic signed [OUT_WIDTH-1:0] data_out[KERNEL_NUM-1:0][PIXELS_OUT_PER_CYCLE- 1:0],
-    output logic conv_out_vld,
+    output logic valid,
     output logic ready
 );
 
@@ -109,7 +109,7 @@ module hessian_conv #(
       clr;
     end else if (clk_en) begin
       add_out_en <= {add_out_en[ADDER_LATENCY-2:0], add_en};
-      conv_out_vld <= add_out_en[ADDER_LATENCY-1];  // WARN: 和其他器件连在一起的时候还是要连续赋值!!
+      valid <= add_out_en[ADDER_LATENCY-1];  // WARN: 和其他器件连在一起的时候还是要连续赋值!!
 
       case (c_state)
         IDLE: begin  // NOTE: 少了一个add_out_en
@@ -120,7 +120,7 @@ module hessian_conv #(
           buf_h <= PAD_SIZE;
           conv_flag <= 0;
 
-          ready <= conv_out_vld ? 1'b0 : 1'b1;
+          ready <= valid ? 1'b0 : 1'b1;
           add_en <= 1'b0;
           counter <= '0;
 
@@ -250,7 +250,7 @@ module hessian_conv #(
   always_comb begin
     case (c_state)
       IDLE: begin
-        n_state = conv_out_vld ? IDLE : READ;
+        n_state = valid ? IDLE : READ;
       end
       READ: begin
         n_state = add_en ? CONV : READ;

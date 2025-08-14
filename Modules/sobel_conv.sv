@@ -9,13 +9,17 @@ module sobel_conv #(
     parameter KERNEL_DATA_WIDTH = 4,
     parameter KERNEL_NUM = 2,
     parameter PIXELS_OUT_PER_CYCLE = 2,
+    parameter MASK_WIDTH = 5,
 
     parameter KERNEL_AREA = KERNEL_SIZE * KERNEL_SIZE,
-    parameter INPUT_NUM = KERNEL_AREA * KERNEL_NUM,
-    parameter MULTIPLIED_WIDTH = IN_WIDTH + KERNEL_DATA_WIDTH,
-    parameter OUT_WIDTH = MULTIPLIED_WIDTH + $clog2(INPUT_NUM),
+    parameter INPUT_NUM = KERNEL_AREA,
+    // WARN: 砍位宽
+    parameter MULTIPLIED_WIDTH = IN_WIDTH + 2,  // [-255*2, 255*2]
+    parameter XY_WIDTH = IN_WIDTH + 3,  // [0, 255*4]
+    parameter OUT_WIDTH = IN_WIDTH + 4,  // [0, 255*8]
+
     parameter IN_NUM_PER_CYCLE = PORT_BITS / IN_WIDTH,
-    parameter READ_CONV_RATIO = IN_NUM_PER_CYCLE / PIXELS_OUT_PER_CYCLE
+    parameter READ_CONV_RATIO  = IN_NUM_PER_CYCLE / PIXELS_OUT_PER_CYCLE
 ) (
     input clk,
     input rst_n,
@@ -23,7 +27,8 @@ module sobel_conv #(
     input logic [PORT_BITS - 1:0] data_in,
     input logic signed [KERNEL_DATA_WIDTH - 1:0] kernel[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0],
     output logic signed [OUT_WIDTH-1:0] data_out[PIXELS_OUT_PER_CYCLE- 1:0],
-    output logic conv_out_vld,
+    output logic signed [OUT_WIDTH-1:0] max,
+    output logic valid,
     output logic ready
 );
 
@@ -38,7 +43,10 @@ module sobel_conv #(
   localparam FIRST_RIGHT_PAD_IDX = ROI_SIZE + PAD_SIZE;
 
   // Buffers, Conv Matrix, Zeros
-  logic signed [IN_WIDTH - 1:0] buffer[KERNEL_SIZE-1:0][BUF_WIDTH-1:0];
+  // WARN: 位宽增加
+  logic signed [IN_WIDTH:0] buffer[KERNEL_SIZE-1:0][BUF_WIDTH-1:0];
+  logic signed [OUT_WIDTH-1:0] dx[PIXELS_OUT_PER_CYCLE- 1:0];
+  logic signed [OUT_WIDTH-1:0] dy[PIXELS_OUT_PER_CYCLE- 1:0];
   logic signed [MULTIPLIED_WIDTH-1:0] conv_mat[PIXELS_OUT_PER_CYCLE-1:0][KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0];
 
   // Indices
@@ -61,30 +69,44 @@ module sobel_conv #(
   reg [COUNTER_BITS-1:0] counter;
 
   // AdderTree
-  logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input[PIXELS_OUT_PER_CYCLE-1:0];
+  logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input_x[PIXELS_OUT_PER_CYCLE-1:0];
+  logic signed [INPUT_NUM*MULTIPLIED_WIDTH-1:0] adder_tree_input_y[PIXELS_OUT_PER_CYCLE-1:0];
 
   // Latency
-  localparam ADDER_LATENCY = $clog2(INPUT_NUM) + 2;
+  localparam ADDER_LATENCY = $clog2(INPUT_NUM * KERNEL_NUM) + 2;
   logic [ADDER_LATENCY-1:0] add_out_en;
 
   genvar n, c, h, w;
   generate
     for (n = 0; n < PIXELS_OUT_PER_CYCLE; n = n + 1) begin
-      for (c = 0; c < KERNEL_NUM; c = c + 1) begin
-        for (h = 0; h < KERNEL_SIZE; h = h + 1) begin
-          for (w = 0; w < KERNEL_SIZE; w = w + 1) begin
-            assign adder_tree_input[n][(c*KERNEL_AREA + h*KERNEL_SIZE + w + 1) * MULTIPLIED_WIDTH -1-:MULTIPLIED_WIDTH] = conv_mat[n][c][h][w];
-          end
+      for (h = 0; h < KERNEL_SIZE; h = h + 1) begin
+        for (w = 0; w < KERNEL_SIZE; w = w + 1) begin
+          assign adder_tree_input_x[n][(h*KERNEL_SIZE + w + 1) * MULTIPLIED_WIDTH -1-:MULTIPLIED_WIDTH] = conv_mat[n][0][h][w];
+          assign adder_tree_input_y[n][(h*KERNEL_SIZE + w + 1) * MULTIPLIED_WIDTH -1-:MULTIPLIED_WIDTH] = conv_mat[n][1][h][w];
         end
       end
       adder_tree #(
           .INPUT_NUM(INPUT_NUM),
-          .IN_WIDTH (MULTIPLIED_WIDTH)
-      ) adder_tree_inst (
+          .IN_WIDTH(MULTIPLIED_WIDTH),
+          .OUT_WIDTH(OUT_WIDTH),
+          .MODE("sobel")
+      ) adder_tree_x (
           .clk  (clk),
           .rst_n(rst_n),
-          .din  (adder_tree_input[n]),
-          .dout (data_out[n])
+          .din  (adder_tree_input_x[n]),
+          .dout (dx[n])
+      );
+
+      adder_tree #(
+          .INPUT_NUM(INPUT_NUM),
+          .IN_WIDTH(MULTIPLIED_WIDTH),
+          .OUT_WIDTH(OUT_WIDTH),
+          .MODE("sobel")
+      ) adder_tree_y (
+          .clk  (clk),
+          .rst_n(rst_n),
+          .din  (adder_tree_input_y[n]),
+          .dout (dy[n])
       );
     end
   endgenerate
@@ -102,12 +124,28 @@ module sobel_conv #(
       ready <= 1'b1;
       add_en <= 1'b0;
       counter <= 0;
+      max <= 0;
 
       add_out_en <= 0;
       clr;
     end else if (clk_en) begin
+      // Valid
       add_out_en <= {add_out_en[ADDER_LATENCY-2:0], add_en};
-      conv_out_vld <= add_out_en[ADDER_LATENCY-1];  // WARN: 和其他器件连在一起的时候还是要连续赋值!!
+      valid <= add_out_en[ADDER_LATENCY-1];  // WARN: 和其他器件连在一起的时候还是要连续赋值!!
+
+      if (valid) begin
+        for (int n = 0; n < PIXELS_OUT_PER_CYCLE; n++) begin : valid
+          if (data_out[n] > max) begin
+            max <= data_out[n];
+          end
+        end
+      end else begin
+        max <= 0;
+      end
+
+      for (int n = 0; n < PIXELS_OUT_PER_CYCLE; n++) begin : dout
+        data_out[n] <= dx[n] + dy[n];
+      end
 
       case (c_state)
         IDLE: begin  // NOTE: 少了一个add_out_en
@@ -118,7 +156,7 @@ module sobel_conv #(
           buf_h <= PAD_SIZE;
           conv_flag <= 0;
 
-          ready <= conv_out_vld ? 1'b0 : 1'b1;
+          ready <= valid ? 1'b0 : 1'b1;
           add_en <= 1'b0;
           counter <= '0;
 
@@ -128,7 +166,7 @@ module sobel_conv #(
         READ: begin
           // Read Data
           for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
-            buffer[buf_h][read_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
+            buffer[buf_h][read_w+n] <= {1'b0, data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]};
           end
 
           // Update Buffer Index & Conv Flag
@@ -148,6 +186,7 @@ module sobel_conv #(
           if (read_w + IN_NUM_PER_CYCLE == FIRST_RIGHT_PAD_IDX && read_h == KERNEL_SIZE - 2) begin: to_conv
             add_en <= 1'b1;
           end
+
         end
 
         CONV: begin
@@ -190,7 +229,7 @@ module sobel_conv #(
               end
             end else begin
               for (int n = 0; n < IN_NUM_PER_CYCLE; n = n + 1) begin
-                buffer[buf_h][read_w+n] <= signed'(data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]);
+                buffer[buf_h][read_w+n] <= {1'b0, data_in[(n+1)*IN_WIDTH-1-:IN_WIDTH]};
               end
             end
           end
@@ -236,6 +275,7 @@ module sobel_conv #(
     end
   endtask
 
+
   // State Machine
   always_ff @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
@@ -248,7 +288,7 @@ module sobel_conv #(
   always_comb begin
     case (c_state)
       IDLE: begin
-        n_state = conv_out_vld ? IDLE : READ;
+        n_state = valid ? IDLE : READ;
       end
       READ: begin
         n_state = add_en ? CONV : READ;

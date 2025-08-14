@@ -29,6 +29,11 @@ class TbMachine:
         self.sobel_y = torch.tensor(
             [[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=torch.int32
         )
+        self.sobel_xy = torch.cat((self.sobel_x, self.sobel_y), dim=0)
+        # sobel_x + sobel_y =
+        # -2 -2 0
+        # -2 0 2
+        # 0 2 2
         self.g_xx = torch.tensor(
             [
                 [
@@ -69,8 +74,8 @@ class TbMachine:
     def _generate_base_data(self, kernel_size):
         """Generates a random image and calculates padding."""
         image = torch.randint(
-            low=-128,
-            high=127,
+            low=0,
+            high=255,
             size=(1, 1, self.roi_size, self.roi_size),
             dtype=torch.int32,
         )
@@ -86,13 +91,17 @@ class TbMachine:
 
         image, pad_size = self._generate_base_data(kernel_size)
 
-        conv_x = F.conv2d(
-            image, self.sobel_x.view(1, 1, kernel_size, kernel_size), padding=pad_size
+        expected_output = F.conv2d(
+            image, self.sobel_xy.view(2, 1, kernel_size, kernel_size), padding=pad_size
         )
-        conv_y = F.conv2d(
-            image, self.sobel_y.view(1, 1, kernel_size, kernel_size), padding=pad_size
-        )
-        expected_output = conv_x + conv_y
+        expected_output = torch.sum(torch.abs(expected_output), dim=1, keepdim=True)
+        print(expected_output.max())
+
+        # expected_output = expected_output / expected_output.max()
+        # expected_output[0, 0, -5:, :] = 0
+        # expected_output[0, 0, :5, :] = 0
+        # expected_output[0, 0, :, -5:] = 0
+        # expected_output[0, 0, :, :5] = 0
 
         kernels = torch.cat([self.sobel_x, self.sobel_y], dim=0).numpy()
         self._write_files(
@@ -148,6 +157,7 @@ class TbMachine:
             + kernel_data_width
             + math.ceil(math.log2(adder_tree_input_num))
         )
+        out_width = self.in_width + 4  # Sobel
 
         write_to_file(
             image.numpy(), os.path.join(self.path, "input_img.txt"), self.in_width

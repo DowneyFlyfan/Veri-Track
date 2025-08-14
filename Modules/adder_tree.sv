@@ -5,7 +5,7 @@ module adder_tree #(
     parameter INPUT_NUM = 18,
     parameter IN_WIDTH = 12,
     parameter OUT_WIDTH = IN_WIDTH + $clog2(INPUT_NUM),
-    parameter SHIFT = 0
+    parameter MODE = "sobel"
 ) (
     input logic clk,
     input logic rst_n,
@@ -35,9 +35,13 @@ module adder_tree #(
       end
     end
   end
-  if (SHIFT) begin
+
+  if (MODE == "sobel") begin  // Sobel
+    assign dout = (adder_tree_data[STAGE_NUM][0] >= 0) ? adder_tree_data[STAGE_NUM][0] : -adder_tree_data[STAGE_NUM][0];
+  end else if (MODE == "hessian") begin  // Hessian
     assign dout = adder_tree_data[STAGE_NUM][0] >>> 15;
-  end else begin
+  end else begin  // NORMAL
     assign dout = adder_tree_data[STAGE_NUM][0];
   end
+
 endmodule

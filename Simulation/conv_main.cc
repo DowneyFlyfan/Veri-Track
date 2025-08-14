@@ -1,10 +1,10 @@
-#include "obj_dir/Vtb_hessian_conv.h"
+#include "obj_dir/Vtb_sobel_conv.h"
 #include "verilated.h"
 #include "verilated_fst_c.h"
 
 int main(int argc, char **argv) {
   Verilated::commandArgs(argc, argv);
-  Vtb_hessian_conv *top = new Vtb_hessian_conv;
+  Vtb_sobel_conv *top = new Vtb_sobel_conv;
   Verilated::traceEverOn(true);
   VerilatedFstC *tfp =
       new VerilatedFstC; // tfp: trace file pointer (跟踪文件指针), fst: Fast
