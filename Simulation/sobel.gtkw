@@ -1,0 +1,74 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Tue Aug 12 09:14:03 2025
+[*]
+[dumpfile] "/Users/downeyflyfan/Projects/Track/Veri-Track/Simulation/waveform.fst"
+[dumpfile_mtime] "Tue Aug 12 09:13:37 2025"
+[dumpfile_size] 120398
+[savefile] "/Users/downeyflyfan/Projects/Track/Veri-Track/Simulation/sobel.gtkw"
+[timestart] 0
+[size] 1728 1051
+[pos] -1 -1
+*-15.709559 46800 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[markername] AA
+[markername] BB
+[markername] CC
+[markername] DD
+[markername] EE
+[markername] FF
+[markername] GG
+[markername] HH
+[markername] II
+[markername] JJ
+[markername] KK
+[markername] LL
+[markername] MM
+[markername] NN
+[markername] OO
+[markername] PP
+[markername] QQ
+[markername] RR
+[markername] SS
+[markername] TT
+[markername] UU
+[markername] VV
+[markername] WW
+[markername] XX
+[markername] YY
+[markername] ZZ
+[treeopen] TOP.
+[treeopen] TOP.tb_sobel_conv.
+[treeopen] TOP.tb_sobel_conv.dut.
+[sst_width] 255
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 317
+@28
+TOP.tb_sobel_conv.clk
+TOP.tb_sobel_conv.rst_n
+TOP.tb_sobel_conv.dut.conv_out_vld
+@22
+TOP.tb_sobel_conv.dut.add_out_en[6:0]
+@28
+TOP.tb_sobel_conv.dut.add_en
+TOP.tb_sobel_conv.dut.n_state[2:0]
+TOP.tb_sobel_conv.dut.c_state[2:0]
+@22
+TOP.tb_sobel_conv.dut.read_w[6:0]
+TOP.tb_sobel_conv.dut.conv_w[5:0]
+TOP.tb_sobel_conv.dut.read_h[6:0]
+TOP.tb_sobel_conv.dut.conv_h[5:0]
+@28
+TOP.tb_sobel_conv.dut.buf_h[1:0]
+TOP.tb_sobel_conv.dut.conv_flag[1:0]
+@22
+TOP.tb_sobel_conv.dut.data_out[0][16:0]
+TOP.tb_sobel_conv.dut.data_out[1][16:0]
+TOP.tb_sobel_conv.dut.data_out[2][16:0]
+TOP.tb_sobel_conv.dut.data_out[3][16:0]
+@28
+TOP.tb_sobel_conv.dut.ready
+@22
+TOP.tb_sobel_conv.dut.data_in[127:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,283 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Fri Aug 15 13:08:22 2025
+[*]
+[dumpfile] "/Users/downeyflyfan/Projects/Track/Veri-Track/Simulation/waveform.fst"
+[dumpfile_mtime] "Fri Aug 15 13:08:16 2025"
+[dumpfile_size] 2619
+[savefile] "/Users/downeyflyfan/Projects/Track/Veri-Track/Simulation/divider.gtkw"
+[timestart] 0
+[size] 1728 1051
+[pos] -1 -1
+*-16.227318 100000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[markername] AA
+[markername] BB
+[markername] CC
+[markername] DD
+[markername] EE
+[markername] FF
+[markername] GG
+[markername] HH
+[markername] II
+[markername] JJ
+[markername] KK
+[markername] LL
+[markername] MM
+[markername] NN
+[markername] OO
+[markername] PP
+[markername] QQ
+[markername] RR
+[markername] SS
+[markername] TT
+[markername] UU
+[markername] VV
+[markername] WW
+[markername] XX
+[markername] YY
+[markername] ZZ
+[treeopen] TOP.
+[treeopen] TOP.tb_divider.
+[sst_width] 255
+[signals_width] 260
+[sst_expanded] 1
+[sst_vpaned_height] 317
+@28
+TOP.tb_divider.dut.clk
+TOP.tb_divider.dut.rst_n
+@c00022
+TOP.tb_divider.dut.rs1[11:0]
+@28
+(0)TOP.tb_divider.dut.rs1[11:0]
+(1)TOP.tb_divider.dut.rs1[11:0]
+(2)TOP.tb_divider.dut.rs1[11:0]
+(3)TOP.tb_divider.dut.rs1[11:0]
+(4)TOP.tb_divider.dut.rs1[11:0]
+(5)TOP.tb_divider.dut.rs1[11:0]
+(6)TOP.tb_divider.dut.rs1[11:0]
+(7)TOP.tb_divider.dut.rs1[11:0]
+(8)TOP.tb_divider.dut.rs1[11:0]
+(9)TOP.tb_divider.dut.rs1[11:0]
+(10)TOP.tb_divider.dut.rs1[11:0]
+(11)TOP.tb_divider.dut.rs1[11:0]
+@1401200
+-group_end
+@22
+TOP.tb_divider.dut.rs2[11:0]
+TOP.tb_divider.dut.divisor[0][21:0]
+TOP.tb_divider.dut.rd[11:0]
+@28
+TOP.tb_divider.dut.ready
+@22
+TOP.tb_divider.dut.outsign[21:0]
+TOP.tb_divider.dut.quotient[0][21:0]
+@c00023
+TOP.tb_divider.dut.quotient[1][21:0]
+@29
+(0)TOP.tb_divider.dut.quotient[1][21:0]
+(1)TOP.tb_divider.dut.quotient[1][21:0]
+(2)TOP.tb_divider.dut.quotient[1][21:0]
+(3)TOP.tb_divider.dut.quotient[1][21:0]
+(4)TOP.tb_divider.dut.quotient[1][21:0]
+(5)TOP.tb_divider.dut.quotient[1][21:0]
+(6)TOP.tb_divider.dut.quotient[1][21:0]
+(7)TOP.tb_divider.dut.quotient[1][21:0]
+(8)TOP.tb_divider.dut.quotient[1][21:0]
+(9)TOP.tb_divider.dut.quotient[1][21:0]
+(10)TOP.tb_divider.dut.quotient[1][21:0]
+(11)TOP.tb_divider.dut.quotient[1][21:0]
+(12)TOP.tb_divider.dut.quotient[1][21:0]
+(13)TOP.tb_divider.dut.quotient[1][21:0]
+(14)TOP.tb_divider.dut.quotient[1][21:0]
+(15)TOP.tb_divider.dut.quotient[1][21:0]
+(16)TOP.tb_divider.dut.quotient[1][21:0]
+(17)TOP.tb_divider.dut.quotient[1][21:0]
+(18)TOP.tb_divider.dut.quotient[1][21:0]
+(19)TOP.tb_divider.dut.quotient[1][21:0]
+(20)TOP.tb_divider.dut.quotient[1][21:0]
+(21)TOP.tb_divider.dut.quotient[1][21:0]
+@1401201
+-group_end
+@22
+TOP.tb_divider.dut.quotient[2][21:0]
+TOP.tb_divider.dut.quotient[3][21:0]
+TOP.tb_divider.dut.quotient[4][21:0]
+TOP.tb_divider.dut.quotient[5][21:0]
+TOP.tb_divider.dut.quotient[6][21:0]
+TOP.tb_divider.dut.quotient[7][21:0]
+TOP.tb_divider.dut.quotient[8][21:0]
+TOP.tb_divider.dut.quotient[9][21:0]
+TOP.tb_divider.dut.quotient[10][21:0]
+@c00022
+TOP.tb_divider.dut.quotient[11][21:0]
+@28
+(0)TOP.tb_divider.dut.quotient[11][21:0]
+(1)TOP.tb_divider.dut.quotient[11][21:0]
+(2)TOP.tb_divider.dut.quotient[11][21:0]
+(3)TOP.tb_divider.dut.quotient[11][21:0]
+(4)TOP.tb_divider.dut.quotient[11][21:0]
+(5)TOP.tb_divider.dut.quotient[11][21:0]
+(6)TOP.tb_divider.dut.quotient[11][21:0]
+(7)TOP.tb_divider.dut.quotient[11][21:0]
+(8)TOP.tb_divider.dut.quotient[11][21:0]
+(9)TOP.tb_divider.dut.quotient[11][21:0]
+(10)TOP.tb_divider.dut.quotient[11][21:0]
+(11)TOP.tb_divider.dut.quotient[11][21:0]
+(12)TOP.tb_divider.dut.quotient[11][21:0]
+(13)TOP.tb_divider.dut.quotient[11][21:0]
+(14)TOP.tb_divider.dut.quotient[11][21:0]
+(15)TOP.tb_divider.dut.quotient[11][21:0]
+(16)TOP.tb_divider.dut.quotient[11][21:0]
+(17)TOP.tb_divider.dut.quotient[11][21:0]
+(18)TOP.tb_divider.dut.quotient[11][21:0]
+(19)TOP.tb_divider.dut.quotient[11][21:0]
+(20)TOP.tb_divider.dut.quotient[11][21:0]
+(21)TOP.tb_divider.dut.quotient[11][21:0]
+@1401200
+-group_end
+@c00022
+TOP.tb_divider.dut.quotient_msk[11][21:0]
+@28
+(0)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(1)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(2)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(3)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(4)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(5)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(6)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(7)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(8)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(9)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(10)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(11)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(12)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(13)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(14)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(15)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(16)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(17)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(18)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(19)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(20)TOP.tb_divider.dut.quotient_msk[11][21:0]
+(21)TOP.tb_divider.dut.quotient_msk[11][21:0]
+@1401200
+-group_end
+@c00022
+TOP.tb_divider.dut.quotient[12][21:0]
+@28
+(0)TOP.tb_divider.dut.quotient[12][21:0]
+(1)TOP.tb_divider.dut.quotient[12][21:0]
+(2)TOP.tb_divider.dut.quotient[12][21:0]
+(3)TOP.tb_divider.dut.quotient[12][21:0]
+(4)TOP.tb_divider.dut.quotient[12][21:0]
+(5)TOP.tb_divider.dut.quotient[12][21:0]
+(6)TOP.tb_divider.dut.quotient[12][21:0]
+(7)TOP.tb_divider.dut.quotient[12][21:0]
+(8)TOP.tb_divider.dut.quotient[12][21:0]
+(9)TOP.tb_divider.dut.quotient[12][21:0]
+(10)TOP.tb_divider.dut.quotient[12][21:0]
+(11)TOP.tb_divider.dut.quotient[12][21:0]
+(12)TOP.tb_divider.dut.quotient[12][21:0]
+(13)TOP.tb_divider.dut.quotient[12][21:0]
+(14)TOP.tb_divider.dut.quotient[12][21:0]
+(15)TOP.tb_divider.dut.quotient[12][21:0]
+(16)TOP.tb_divider.dut.quotient[12][21:0]
+(17)TOP.tb_divider.dut.quotient[12][21:0]
+(18)TOP.tb_divider.dut.quotient[12][21:0]
+(19)TOP.tb_divider.dut.quotient[12][21:0]
+(20)TOP.tb_divider.dut.quotient[12][21:0]
+(21)TOP.tb_divider.dut.quotient[12][21:0]
+@1401200
+-group_end
+@22
+TOP.tb_divider.dut.quotient[13][21:0]
+TOP.tb_divider.dut.quotient[14][21:0]
+@c00022
+TOP.tb_divider.dut.quotient[15][21:0]
+@28
+(0)TOP.tb_divider.dut.quotient[15][21:0]
+(1)TOP.tb_divider.dut.quotient[15][21:0]
+(2)TOP.tb_divider.dut.quotient[15][21:0]
+(3)TOP.tb_divider.dut.quotient[15][21:0]
+(4)TOP.tb_divider.dut.quotient[15][21:0]
+(5)TOP.tb_divider.dut.quotient[15][21:0]
+(6)TOP.tb_divider.dut.quotient[15][21:0]
+(7)TOP.tb_divider.dut.quotient[15][21:0]
+(8)TOP.tb_divider.dut.quotient[15][21:0]
+(9)TOP.tb_divider.dut.quotient[15][21:0]
+(10)TOP.tb_divider.dut.quotient[15][21:0]
+(11)TOP.tb_divider.dut.quotient[15][21:0]
+(12)TOP.tb_divider.dut.quotient[15][21:0]
+(13)TOP.tb_divider.dut.quotient[15][21:0]
+(14)TOP.tb_divider.dut.quotient[15][21:0]
+(15)TOP.tb_divider.dut.quotient[15][21:0]
+(16)TOP.tb_divider.dut.quotient[15][21:0]
+(17)TOP.tb_divider.dut.quotient[15][21:0]
+(18)TOP.tb_divider.dut.quotient[15][21:0]
+(19)TOP.tb_divider.dut.quotient[15][21:0]
+(20)TOP.tb_divider.dut.quotient[15][21:0]
+(21)TOP.tb_divider.dut.quotient[15][21:0]
+@1401200
+-group_end
+@22
+TOP.tb_divider.dut.quotient[16][21:0]
+TOP.tb_divider.dut.quotient[17][21:0]
+TOP.tb_divider.dut.quotient[18][21:0]
+@c00022
+TOP.tb_divider.dut.quotient[19][21:0]
+@28
+(0)TOP.tb_divider.dut.quotient[19][21:0]
+(1)TOP.tb_divider.dut.quotient[19][21:0]
+(2)TOP.tb_divider.dut.quotient[19][21:0]
+(3)TOP.tb_divider.dut.quotient[19][21:0]
+(4)TOP.tb_divider.dut.quotient[19][21:0]
+(5)TOP.tb_divider.dut.quotient[19][21:0]
+(6)TOP.tb_divider.dut.quotient[19][21:0]
+(7)TOP.tb_divider.dut.quotient[19][21:0]
+(8)TOP.tb_divider.dut.quotient[19][21:0]
+(9)TOP.tb_divider.dut.quotient[19][21:0]
+(10)TOP.tb_divider.dut.quotient[19][21:0]
+(11)TOP.tb_divider.dut.quotient[19][21:0]
+(12)TOP.tb_divider.dut.quotient[19][21:0]
+(13)TOP.tb_divider.dut.quotient[19][21:0]
+(14)TOP.tb_divider.dut.quotient[19][21:0]
+(15)TOP.tb_divider.dut.quotient[19][21:0]
+(16)TOP.tb_divider.dut.quotient[19][21:0]
+(17)TOP.tb_divider.dut.quotient[19][21:0]
+(18)TOP.tb_divider.dut.quotient[19][21:0]
+(19)TOP.tb_divider.dut.quotient[19][21:0]
+(20)TOP.tb_divider.dut.quotient[19][21:0]
+(21)TOP.tb_divider.dut.quotient[19][21:0]
+@1401200
+-group_end
+@22
+TOP.tb_divider.dut.quotient[20][21:0]
+@c00022
+TOP.tb_divider.dut.quotient[21][21:0]
+@28
+(0)TOP.tb_divider.dut.quotient[21][21:0]
+(1)TOP.tb_divider.dut.quotient[21][21:0]
+(2)TOP.tb_divider.dut.quotient[21][21:0]
+(3)TOP.tb_divider.dut.quotient[21][21:0]
+(4)TOP.tb_divider.dut.quotient[21][21:0]
+(5)TOP.tb_divider.dut.quotient[21][21:0]
+(6)TOP.tb_divider.dut.quotient[21][21:0]
+(7)TOP.tb_divider.dut.quotient[21][21:0]
+(8)TOP.tb_divider.dut.quotient[21][21:0]
+(9)TOP.tb_divider.dut.quotient[21][21:0]
+(10)TOP.tb_divider.dut.quotient[21][21:0]
+(11)TOP.tb_divider.dut.quotient[21][21:0]
+(12)TOP.tb_divider.dut.quotient[21][21:0]
+(13)TOP.tb_divider.dut.quotient[21][21:0]
+(14)TOP.tb_divider.dut.quotient[21][21:0]
+(15)TOP.tb_divider.dut.quotient[21][21:0]
+(16)TOP.tb_divider.dut.quotient[21][21:0]
+(17)TOP.tb_divider.dut.quotient[21][21:0]
+(18)TOP.tb_divider.dut.quotient[21][21:0]
+(19)TOP.tb_divider.dut.quotient[21][21:0]
+(20)TOP.tb_divider.dut.quotient[21][21:0]
+(21)TOP.tb_divider.dut.quotient[21][21:0]
+@1401200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0
