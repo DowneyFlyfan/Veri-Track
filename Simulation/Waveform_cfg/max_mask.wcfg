@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_sobel_conv_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_sobel_conv" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="305.601 ns"></ZoomEndTime>
+      <Cursor1Time time="85.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="196"></NameColumnWidth>
+      <ValueColumnWidth column_width="81"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="19" />
+   <wvobject fp_name="/tb_sobel_conv/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/clk_en" type="logic">
+      <obj_property name="ElementShortName">clk_en</obj_property>
+      <obj_property name="ObjectShortName">clk_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/rst_n" type="logic">
+      <obj_property name="ElementShortName">rst_n</obj_property>
+      <obj_property name="ObjectShortName">rst_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/kernel_vec" type="array">
+      <obj_property name="ElementShortName">kernel_vec[17:0][3:0]</obj_property>
+      <obj_property name="ObjectShortName">kernel_vec[17:0][3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/in_img" type="array">
+      <obj_property name="ElementShortName">in_img[4095:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">in_img[4095:0][7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/out_img" type="array">
+      <obj_property name="ElementShortName">out_img[4095:0][11:0]</obj_property>
+      <obj_property name="ObjectShortName">out_img[4095:0][11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/din" type="array">
+      <obj_property name="ElementShortName">din[127:0]</obj_property>
+      <obj_property name="ObjectShortName">din[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/sobel_dout" type="array">
+      <obj_property name="ElementShortName">sobel_dout[1:0][11:0]</obj_property>
+      <obj_property name="ObjectShortName">sobel_dout[1:0][11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/dout" type="array">
+      <obj_property name="ElementShortName">dout[1:0][11:0]</obj_property>
+      <obj_property name="ObjectShortName">dout[1:0][11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/max" type="array">
+      <obj_property name="ElementShortName">max[11:0]</obj_property>
+      <obj_property name="ObjectShortName">max[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/sobel_conv_valid" type="logic">
+      <obj_property name="ElementShortName">sobel_conv_valid</obj_property>
+      <obj_property name="ObjectShortName">sobel_conv_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/sobel_conv_inst/add_out_en" type="array">
+      <obj_property name="ElementShortName">add_out_en[6:0]</obj_property>
+      <obj_property name="ObjectShortName">add_out_en[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/sobel_conv_inst/add_en" type="logic">
+      <obj_property name="ElementShortName">add_en</obj_property>
+      <obj_property name="ObjectShortName">add_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/dout_valid" type="logic">
+      <obj_property name="ElementShortName">dout_valid</obj_property>
+      <obj_property name="ObjectShortName">dout_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/ready" type="logic">
+      <obj_property name="ElementShortName">ready</obj_property>
+      <obj_property name="ObjectShortName">ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/in_pixel_idx" type="array">
+      <obj_property name="ElementShortName">in_pixel_idx[31:0]</obj_property>
+      <obj_property name="ObjectShortName">in_pixel_idx[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/out_pixel_idx" type="array">
+      <obj_property name="ElementShortName">out_pixel_idx[31:0]</obj_property>
+      <obj_property name="ObjectShortName">out_pixel_idx[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/sobel_conv_inst/c_state" type="array">
+      <obj_property name="ElementShortName">c_state[2:0]</obj_property>
+      <obj_property name="ObjectShortName">c_state[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_sobel_conv/sobel_conv_inst/n_state" type="array">
+      <obj_property name="ElementShortName">n_state[2:0]</obj_property>
+      <obj_property name="ObjectShortName">n_state[2:0]</obj_property>
+   </wvobject>
+</wave_config>
