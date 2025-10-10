@@ -25,7 +25,7 @@ module sobel_conv #(
     input logic [PORT_BITS - 1:0] data_in,
     input logic signed [KERNEL_DATA_WIDTH - 1:0] kernel[KERNEL_NUM-1:0][KERNEL_SIZE-1:0][KERNEL_SIZE-1:0],
     output logic signed [OUT_WIDTH-1:0] data_out[PIXELS_OUT_PER_CYCLE- 1:0],
-    output logic signed [OUT_WIDTH-1:0] max,  // FIX:错误的
+    output logic signed [OUT_WIDTH-1:0] max,
     output logic valid,
     output logic ready
 );
